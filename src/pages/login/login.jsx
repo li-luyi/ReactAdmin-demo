@@ -3,6 +3,9 @@ import "./login.less";
 import logo from "../../assets/images/logo.png";
 import { Form, Icon, Input, Button, message } from "antd";
 import { reqLogin } from "../../api/index";
+import storageUtils from "../../utils/storageUtils";
+import memoryUtils from "../../utils/memoryUtils";
+import { Redirect } from "react-router-dom";
 const FormItem = Form.Item;
 
 class Login extends Component {
@@ -13,6 +16,9 @@ class Login extends Component {
         reqLogin(values).then((res) => {
           if (res.status === 0) {
             message.success("登录成功！");
+            // 保存用户信息
+            memoryUtils.user = res.data;
+            storageUtils.setUser(res.data);
             this.props.history.replace("/");
           } else {
             message.error(res.msg);
@@ -24,8 +30,13 @@ class Login extends Component {
     });
   };
   render() {
+    const user = memoryUtils.user;
+    if (user && user._id) {
+      return <Redirect to="/" />;
+    }
     const form = this.props.form;
     const { getFieldDecorator } = form;
+
     return (
       <div className="login">
         <header className="login-header">
